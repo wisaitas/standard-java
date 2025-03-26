@@ -6,9 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.github.wisaitas.auth_service.entities.UserEntity;
-import com.github.wisaitas.sharelib.repositories.BaseRepository;
 
 @Repository
-public interface UserRepository extends BaseRepository<UserEntity> {
+public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
 }
