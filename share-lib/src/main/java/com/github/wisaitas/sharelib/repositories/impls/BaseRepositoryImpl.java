@@ -1,31 +1,23 @@
 package com.github.wisaitas.sharelib.repositories.impls;
 
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.github.wisaitas.sharelib.dtos.queries.PaginationQuery;
-import com.github.wisaitas.sharelib.entities.BaseEntity;
 import com.github.wisaitas.sharelib.repositories.BaseRepository;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-public class BaseRepositoryImpl<T extends BaseEntity> extends SimpleJpaRepository<T, UUID>
-        implements BaseRepository<T> {
+public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
 
     private final EntityManager entityManager;
     private final Class<T> domainClass;
@@ -36,82 +28,81 @@ public class BaseRepositoryImpl<T extends BaseEntity> extends SimpleJpaRepositor
         this.domainClass = entityInformation.getJavaType();
     }
 
-    public BaseRepositoryImpl(Class<T> domainClass, EntityManager entityManager) {
-        super(domainClass, entityManager);
-        this.entityManager = entityManager;
-        this.domainClass = domainClass;
-    }
-
     @Override
-    public List<T> getAll(PaginationQuery pagination, Object condition) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> query = builder.createQuery(domainClass);
+    public List<T> findAllWithCondition(Object condition, String... relations) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
         Root<T> root = query.from(domainClass);
+        
 
-        if (pagination.getPage() != null && pagination.getPageSize() != null) {
-            Sort sort = Sort.unsorted();
-            if (pagination.getSort() != null && pagination.getOrder() != null) {
-                sort = Sort.by(pagination.getOrder().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                        pagination.getSort());
-            }
-
-            PageRequest pageRequest = PageRequest.of(
-                    pagination.getPage(), pagination.getPageSize(), sort);
-
-            return findAll(pageRequest).getContent();
-        }
-
-        return findAll();
+        // นี่เป็นเพียงตัวอย่าง
+        
+        return entityManager.createQuery(query).getResultList();
     }
 
     @Override
-    public T getBy(Object condition) {
-        return findAll().stream().findFirst().orElse(null);
+    public Page<T> findAllWithCondition(Object condition, Pageable pageable, String... relations) {
+        // ทำการ implement โค้ดสำหรับการค้นหาแบบแบ่งหน้า
+        return findAll(pageable);
     }
 
     @Override
+    public Optional<T> findByCondition(Object condition, String... relations) {
+        // ทำการ implement โค้ดสำหรับการค้นหาด้วยเงื่อนไข
+        return Optional.empty();
+    }
+
+    @Override
+    @Transactional
     public T create(T item) {
-        return super.save(item);
+        return save(item);
     }
 
     @Override
+    @Transactional
     public List<T> createMany(List<T> items) {
         return saveAll(items);
     }
 
     @Override
+    @Transactional
     public T update(T item) {
-        return super.save(item);
+        return save(item);
     }
 
     @Override
+    @Transactional
     public List<T> updateMany(List<T> items) {
         return saveAll(items);
     }
 
     @Override
-    public T saveEntity(T item) {
+    @Transactional
+    public T save(T item) {
         return super.save(item);
     }
 
     @Override
+    @Transactional
     public List<T> saveMany(List<T> items) {
         return saveAll(items);
     }
 
     @Override
+    @Transactional
     public void delete(T item) {
         super.delete(item);
     }
 
     @Override
+    @Transactional
     public void deleteMany(List<T> items) {
         deleteAll(items);
     }
 
     @Override
-    @Transactional
-    public BaseRepository<T> withTransaction() {
+    public BaseRepository<T, ID> withTransaction() {
+        // สร้าง Transaction
         return this;
     }
 }

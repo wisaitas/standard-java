@@ -1,23 +1,20 @@
 package com.github.wisaitas.sharelib.repositories;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import com.github.wisaitas.sharelib.dtos.queries.PaginationQuery;
-import com.github.wisaitas.sharelib.entities.BaseEntity;
+import java.util.List;
+import java.util.Optional;
 
 @NoRepositoryBean
-public interface BaseRepository<T extends BaseEntity> extends JpaRepository<T, UUID> {
+public interface BaseRepository<T, ID> extends JpaRepository<T, ID> {
+    List<T> findAllWithCondition(Object condition, String... relations);
 
-    List<T> getAll(PaginationQuery pagination, Object condition);
+    Page<T> findAllWithCondition(Object condition, Pageable pageable, String... relations);
 
-    T getBy(Object condition);
+    Optional<T> findByCondition(Object condition, String... relations);
 
     T create(T item);
 
@@ -27,7 +24,7 @@ public interface BaseRepository<T extends BaseEntity> extends JpaRepository<T, U
 
     List<T> updateMany(List<T> items);
 
-    T saveEntity(T item);
+    T save(T item);
 
     List<T> saveMany(List<T> items);
 
@@ -35,6 +32,5 @@ public interface BaseRepository<T extends BaseEntity> extends JpaRepository<T, U
 
     void deleteMany(List<T> items);
 
-    @Transactional
-    BaseRepository<T> withTransaction();
+    BaseRepository<T, ID> withTransaction();
 }
