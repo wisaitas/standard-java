@@ -1,5 +1,6 @@
 package com.github.wisaitas.auth_service.controllers;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +17,11 @@ import jakarta.validation.Valid;
 @RequestMapping(path = "/api/v1/auth")
 public class AuthController {
     @PostMapping(path = "/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(SuccessResponse.builder()
-                .message("user registered successfully")
-                .build());
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) throws BadRequestException {
+        throw new BadRequestException("test");
+        // return
+        // ResponseEntity.status(HttpStatus.CREATED).body(SuccessResponse.builder()
+        // .message("user registered successfully")
+        // .build());
     }
 }
